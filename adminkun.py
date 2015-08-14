@@ -27,14 +27,23 @@ Options:
 def fetch_episodes():
     headers = {'User-Agent': UA}
     response = requests.get(DOMAIN + END_POINT, headers=headers)
-    response.encoding = response.apparent_encoding
+    response.encoding = 'SHIFT_JIS'
     soup = BeautifulSoup(response.text)
+    links = []
+    titles = []
+    for node in soup.findAll('div', {'id': 'adminkun-new-articles'}):
+        for tag in node.findAll('a', href=True):
+            #  print(tag['href'])
+            links.append(tag['href'])
+
+        for tag in node.findAll('h4'):
+            #  print(tag.string)
+            titles.append(tag.string)
+
     episodes = []
-    for node in soup.findAll('div', {'class': 'newbox'}):
-        for tag in node('table', {'width': '100%', 'cellpadding': '3'}):
-            for atag in tag('a'):
-                if atag.string != None:
-                    episodes.append([atag['href'], atag.string])
+    for (title, link) in zip(titles, links):
+        episodes.append([title, link])
+
     episodes.reverse()
     return episodes
 
@@ -65,7 +74,7 @@ def tweet_episode():
     episodes = fetch_episodes()
     with open(TEXT, 'a+') as fp:
         for episode in episodes:
-            url, title, uid = episode[0], episode[1], episode[0] + '\n'
+            url, title, uid = episode[1], episode[0], episode[1] + '\n'
             if not lines or uid not in lines:
                 post = u'{0} {1}'.format(title, url)
                 if args['--no-tweet']:

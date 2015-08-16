@@ -33,11 +33,9 @@ def fetch_episodes():
     titles = []
     for node in soup.findAll('div', {'id': 'adminkun-new-articles'}):
         for tag in node.findAll('a', href=True):
-            #  print(tag['href'])
             links.append(tag['href'])
 
         for tag in node.findAll('h4'):
-            #  print(tag.string)
             titles.append(tag.string)
 
     episodes = []
